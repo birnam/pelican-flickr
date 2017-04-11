@@ -1,7 +1,7 @@
 import json
 import os
 import tempfile
-import main
+from . import pelicanflickr
 
 class FlickrCached(object):
   '''
@@ -22,7 +22,7 @@ class FlickrCached(object):
 
     # Setup cache dir
     cache_dir = os.path.join(tempfile.gettempdir(), 'pelican_flickr')
-    if main.FLICKR_CACHE and not os.path.isdir(cache_dir):
+    if pelicanflickr.FLICKR_CACHE and not os.path.isdir(cache_dir):
       os.mkdir(cache_dir)
 
     # Setup final cache path for object
@@ -32,7 +32,7 @@ class FlickrCached(object):
     '''
     Get a data set from cache
     '''
-    if not main.FLICKR_CACHE:
+    if not pelicanflickr.FLICKR_CACHE:
       return False
 
     if not os.path.exists(self.cache_path):
@@ -49,7 +49,7 @@ class FlickrCached(object):
     '''
     Save a serializable data set in local cache
     '''
-    if not main.FLICKR_CACHE:
+    if not pelicanflickr.FLICKR_CACHE:
       return False
 
     with open(self.cache_path, 'w') as f:
@@ -59,6 +59,6 @@ class FlickrCached(object):
   def build_paths(self, parts):
     # Build path, url, and slug for a cache object
     self.slug = '/'.join(parts)
-    self.generated_path = '%s/%s.html' % (main.FLICKR_OUTPUT_DIRNAME, self.slug)
+    self.generated_path = '%s/%s.html' % (pelicanflickr.FLICKR_OUTPUT_DIRNAME, self.slug)
     self.url = '/' + self.generated_path
 

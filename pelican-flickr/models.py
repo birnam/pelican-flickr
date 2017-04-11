@@ -1,10 +1,11 @@
 # codinf=utf-8
 from pelican.utils import slugify
 from .cached import FlickrCached
-import main
+from . import pelicanflickr
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class FlickrPhotoset(FlickrCached):
   '''
@@ -12,6 +13,7 @@ class FlickrPhotoset(FlickrCached):
   '''
   primary = None
   photos = []
+
 
   def __init__(self, xml=None, id=None):
     if xml is not None:
@@ -36,8 +38,10 @@ class FlickrPhotoset(FlickrCached):
     # Always update paths
     self.build_paths((slugify(self.title), ))
 
+
   def __unicode__(self):
     return u"Flickr Photoset %s '%s'" % (self.id, self.title)
+
 
   def __getattr__(self, name):
     return self.data.get(name, None)
@@ -52,7 +56,7 @@ class FlickrPhotoset(FlickrCached):
     self.photos = []
     try:
       # Update authorized ?
-      if not main.FLICKR_UPDATE:
+      if not pelicanflickr.FLICKR_UPDATE:
         raise Exception('No flickr update authorized from settings.')
 
       photos = api.photosets_getPhotos(photoset_id=self.id, media='photos')
@@ -61,10 +65,10 @@ class FlickrPhotoset(FlickrCached):
       xml_photos = self.data['photos']
 
     for i, xml in enumerate(xml_photos):
-      photo_id = type(xml) == unicode and xml or xml.attrib['id']
+      photo_id = type(xml) == str and xml or xml.attrib['id']
       try:
         photo = FlickrPhoto(photo_id, api, self)
-      except Exception, e:
+      except Exception as e:
         logger.error('%d/%d Failed loading of %s : %s', i+1, len(xml_photos), photo_id, str(e))
         continue
       logger.debug(u'%d/%d %s from %s' % (i+1, len(xml_photos), photo, photo.cached and 'cache' or 'flickr'))
@@ -97,7 +101,7 @@ class FlickrPhoto(FlickrCached):
     self.fetch()
 
     # Update authorized ?
-    if main.FLICKR_UPDATE:
+    if pelicanflickr.FLICKR_UPDATE:
       self.load_from_flickr()
 
     # Check data
@@ -117,7 +121,7 @@ class FlickrPhoto(FlickrCached):
           'infos' : infos,
           'sizes' : self.load_sizes(),
         }
-    except Exception, e:
+    except Exception as e:
       logger.error(str(e))
 
   def __unicode__(self):
